@@ -1,0 +1,149 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Python 闯关练习 · 代码补全</title>
+  <link rel="stylesheet" href="css/style.css" />
+</head>
+<body>
+  <!-- 首次加载 Pyodide 的遮罩 -->
+  <div id="py-overlay" class="py-overlay hidden">
+    <div class="py-overlay-card">
+      <div class="spinner"></div>
+      <p>正在加载 Python 运行环境（首次需要下载约 10MB，请稍候）…</p>
+    </div>
+  </div>
+
+  <header class="topbar">
+    <div class="brand">
+      <span class="logo">🐍</span>
+      <div class="brand-text">
+        <h1>Python 闯关练习</h1>
+        <p>通过补全代码，深度掌握基础语法</p>
+      </div>
+    </div>
+    <div class="progress-area">
+      <div class="progress-meta">
+        <span id="progress-text">已完成 0 / 50</span>
+        <button id="reset-btn" class="ghost-btn" title="清空本地进度">重置进度</button>
+      </div>
+      <div class="progress-track"><div id="progress-bar" class="progress-bar"></div></div>
+    </div>
+  </header>
+
+  <div class="layout">
+    <aside class="sidebar">
+      <div class="sidebar-section">
+        <button id="fav-toggle" class="fav-toggle" title="只看收藏的题目">
+          <span class="fav-toggle-icon">⭐</span>
+          <span class="fav-toggle-text">收藏夹</span>
+          <span id="fav-count" class="fav-count">0</span>
+        </button>
+      </div>
+      <div class="sidebar-section">
+        <h3 class="sidebar-title">章节</h3>
+        <nav id="chapter-list" class="chapter-list"></nav>
+      </div>
+      <div class="sidebar-section">
+        <h3 class="sidebar-title">难度筛选</h3>
+        <div id="difficulty-filter" class="diff-filter"></div>
+      </div>
+      <div class="sidebar-tip">
+        <p>💡 点击「运行」会在浏览器里真实执行 Python，通过测试即算闯关成功。</p>
+      </div>
+    </aside>
+
+    <main class="main">
+      <!-- 题目卡片 -->
+      <section id="question-card" class="card question-card">
+        <div class="question-head">
+          <div class="question-head-left">
+            <div class="question-meta">
+              <span id="question-number" class="q-number"></span>
+              <span id="chapter-label" class="chapter-pill"></span>
+              <span id="difficulty-badge" class="badge"></span>
+            </div>
+            <h2 id="question-title" class="question-title"></h2>
+          </div>
+          <button id="fav-btn" class="fav-btn" title="收藏本题" aria-pressed="false">☆</button>
+        </div>
+
+        <div class="knowledge-row">
+          <span class="kp-label">考察知识点</span>
+          <span id="kp-tag" class="kp-tag"></span>
+        </div>
+
+        <p id="prompt" class="prompt"></p>
+
+        <div class="editor-wrap">
+          <div id="gutter" class="gutter" aria-hidden="true"></div>
+          <textarea id="editor" class="editor" spellcheck="false" autocomplete="off" autocapitalize="off"></textarea>
+        </div>
+
+        <div class="toolbar">
+          <button id="run-btn" class="btn btn-primary">▶ 运行代码</button>
+          <button id="hint-btn" class="btn btn-ghost">💡 提示</button>
+          <button id="solution-btn" class="btn btn-ghost">查看答案</button>
+          <button id="reset-q-btn" class="btn btn-ghost">↺ 还原本题</button>
+          <span class="kbd-hint">Ctrl / ⌘ + Enter 运行</span>
+        </div>
+
+        <div id="hint-box" class="hint-box hidden"></div>
+
+        <div id="result-banner" class="result-banner hidden"></div>
+
+        <div class="output-panel">
+          <div class="output-head">
+            <span>运行输出</span>
+            <button id="clear-output" class="mini-btn">清空</button>
+          </div>
+          <pre id="output-pre" class="output-pre">— 点击「运行代码」后，这里会显示程序输出与判分结果 —</pre>
+        </div>
+
+        <div id="explanation-panel" class="explanation-panel">
+          <div class="explanation-head">
+            <span class="exp-title">📖 知识点详解</span>
+            <button id="toggle-explanation" class="mini-btn">展开</button>
+          </div>
+          <div id="explanation-body" class="explanation-body">
+            <div id="explanation-text" class="explanation-text"></div>
+            <div class="solution-block">
+              <div class="solution-head">
+                <span>参考答案</span>
+                <button id="copy-solution" class="mini-btn">复制</button>
+              </div>
+              <pre id="solution-code" class="solution-code"></pre>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <div id="pager" class="pager">
+        <button id="prev-btn" class="btn btn-ghost">← 上一题</button>
+        <div class="pager-center">
+          <span id="pager-info" class="pager-info"></span>
+          <div class="jump-group">
+            <label for="jump-input" class="jump-label">跳转到第</label>
+            <input id="jump-input" type="number" min="1" placeholder="题号" inputmode="numeric" />
+            <span class="jump-suffix">题</span>
+            <button id="jump-btn" class="btn btn-ghost btn-sm">跳转</button>
+          </div>
+        </div>
+        <button id="next-btn" class="btn btn-ghost">下一题 →</button>
+      </div>
+
+      <!-- 收藏夹为空时的提示 -->
+      <section id="empty-state" class="card empty-state hidden">
+        <div class="empty-icon">⭐</div>
+        <h2>收藏夹还是空的</h2>
+        <p>在题目右上角点 ☆ 收藏你喜欢的题目，之后就能在这里集中复习它们。</p>
+        <button id="empty-back-btn" class="btn btn-primary">浏览全部题目</button>
+      </section>
+    </main>
+  </div>
+
+  <script src="js/questions.js"></script>
+  <script src="js/app.js"></script>
+</body>
+</html>
