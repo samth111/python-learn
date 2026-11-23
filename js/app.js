@@ -42,7 +42,6 @@ const els = {
   chapterLabel: $("chapter-label"),
   difficultyBadge: $("difficulty-badge"),
   questionTitle: $("question-title"),
-  kpTag: $("kp-tag"),
   favBtn: $("fav-btn"),
   prompt: $("prompt"),
   gutter: $("gutter"),
@@ -213,7 +212,6 @@ function renderQuestion() {
   els.difficultyBadge.textContent = DIFFICULTY[q.difficulty];
   els.difficultyBadge.className = "badge d" + q.difficulty;
   els.questionTitle.textContent = q.title;
-  els.kpTag.textContent = q.knowledgePoint;
   els.prompt.textContent = q.prompt;
   updateFavButton();
 
